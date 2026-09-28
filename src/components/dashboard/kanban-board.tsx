@@ -39,7 +39,7 @@ interface KanbanBoardProps {
   onEdit: (app: JobApplication) => void;
   onDelete: (id: string) => Promise<unknown>;
   onUpdate: (id: string, patch: Partial<ApplicationInput>) => Promise<unknown>;
-  onAdd: () => void;
+  onAdd: (status?: ApplicationStatus) => void;
 }
 
 export function KanbanBoard({
@@ -98,7 +98,7 @@ export function KanbanBoard({
   }
 
   if (!hasAny) {
-    return <EmptyState onAdd={onAdd} />;
+    return <EmptyState onAdd={() => onAdd()} />;
   }
 
   return (
@@ -113,6 +113,7 @@ export function KanbanBoard({
               locale={locale}
               onEdit={onEdit}
               onDelete={setPendingDelete}
+              onAdd={onAdd}
             />
           ))}
         </div>

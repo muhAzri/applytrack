@@ -2,6 +2,7 @@
 
 import { useDroppable } from "@dnd-kit/core";
 import { useTranslations } from "next-intl";
+import { Plus } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { STATUS_DOT_CLASS, type ApplicationStatus, type JobApplication } from "@/types/application";
 import { KanbanCard } from "@/components/dashboard/kanban-card";
@@ -12,9 +13,10 @@ interface KanbanColumnProps {
   locale: string;
   onEdit: (app: JobApplication) => void;
   onDelete: (app: JobApplication) => void;
+  onAdd: (status: ApplicationStatus) => void;
 }
 
-export function KanbanColumn({ status, apps, locale, onEdit, onDelete }: KanbanColumnProps) {
+export function KanbanColumn({ status, apps, locale, onEdit, onDelete, onAdd }: KanbanColumnProps) {
   const tStatus = useTranslations("Status");
   const tDashboard = useTranslations("Dashboard");
   const { setNodeRef, isOver } = useDroppable({ id: status });
@@ -24,7 +26,15 @@ export function KanbanColumn({ status, apps, locale, onEdit, onDelete }: KanbanC
       <div className="flex items-center gap-2 px-1 pb-3">
         <span className={cn("size-1.5 rounded-full", STATUS_DOT_CLASS[status])} />
         <h3 className="text-sm font-medium">{tStatus(status)}</h3>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{apps.length}</span>
+        <span className="text-xs text-muted-foreground tabular-nums">{apps.length}</span>
+        <button
+          type="button"
+          onClick={() => onAdd(status)}
+          aria-label={`${tDashboard("addButton")} (${tStatus(status)})`}
+          className="ml-auto flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Plus weight="bold" className="size-4" />
+        </button>
       </div>
       <div
         ref={setNodeRef}

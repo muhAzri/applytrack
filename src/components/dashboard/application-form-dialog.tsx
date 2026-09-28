@@ -63,6 +63,7 @@ interface ApplicationFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editing: JobApplication | null;
+  defaultStatus?: ApplicationStatus;
   onSubmit: (input: ApplicationInput) => Promise<unknown>;
 }
 
@@ -70,6 +71,7 @@ export function ApplicationFormDialog({
   open,
   onOpenChange,
   editing,
+  defaultStatus,
   onSubmit,
 }: ApplicationFormDialogProps) {
   const t = useTranslations("Dashboard.form");
@@ -78,15 +80,20 @@ export function ApplicationFormDialog({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Reset the form whenever the dialog opens (or switches which item it's
-  // editing) by adjusting state during render, per React's guidance for
-  // syncing state to a changing prop instead of doing it in an effect.
-  const openKey = open ? editing?.id ?? "__new__" : null;
-  const [syncedKey, setSyncedKey] = useState<string | null>(null);
-  if (openKey !== null && openKey !== syncedKey) {
-    setSyncedKey(openKey);
-    setForm(editing ? toFormState(editing) : EMPTY_FORM);
-    setError(null);
+  // Reset the form every time the dialog transitions from closed to open,
+  // by adjusting state during render (React's guidance for syncing state to
+  // a changing prop instead of doing it in an effect). This also picks up a
+  // fresh `defaultStatus` on every open, even for two consecutive "add new"
+  // invocations targeting different kanban columns.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setForm(
+        editing ? toFormState(editing) : { ...EMPTY_FORM, status: defaultStatus ?? "applied" }
+      );
+      setError(null);
+    }
   }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {

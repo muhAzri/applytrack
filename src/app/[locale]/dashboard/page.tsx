@@ -57,8 +57,11 @@ export default function DashboardPage() {
     return searched.filter((app) => app.status === filter);
   }, [searched, filter]);
 
-  function openCreate() {
+  const [createStatus, setCreateStatus] = useState<ApplicationStatus>("applied");
+
+  function openCreate(status?: ApplicationStatus) {
     setEditing(null);
+    setCreateStatus(status ?? "applied");
     setDialogOpen(true);
   }
 
@@ -81,7 +84,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <Button onClick={openCreate} className="w-fit">
+        <Button onClick={() => openCreate()} className="w-fit">
           <Plus weight="bold" className="size-4" />
           {t("addButton")}
         </Button>
@@ -182,6 +185,7 @@ export default function DashboardPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         editing={editing}
+        defaultStatus={createStatus}
         onSubmit={(input) =>
           editing ? update(editing.id, input) : create(input)
         }
