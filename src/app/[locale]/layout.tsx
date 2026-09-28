@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -7,7 +7,15 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { routing } from "@/i18n/routing";
+import { SITE_NAME, SITE_URL, localizedUrl, ogLocale } from "@/lib/seo";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
+  ],
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +37,48 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Metadata" });
+
+  const title = t("title");
+  const description = t("description");
+  const url = localizedUrl(locale, "/");
+
   return {
-    title: t("title"),
-    description: t("description"),
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    applicationName: SITE_NAME,
+    formatDetection: { email: false, address: false, telephone: false },
+    alternates: {
+      canonical: url,
+      languages: Object.fromEntries(
+        routing.locales.map((l) => [l, localizedUrl(l, "/")])
+      ),
+    },
+    openGraph: {
+      type: "website",
+      url,
+      title,
+      description,
+      siteName: SITE_NAME,
+      locale: ogLocale(locale),
+      alternateLocale: routing.locales.filter((l) => l !== locale).map(ogLocale),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
   };
 }
 

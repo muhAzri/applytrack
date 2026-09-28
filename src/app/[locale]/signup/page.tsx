@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { LogoMark } from "@/components/logo-mark";
 import { AuthForm } from "@/components/auth/auth-form";
+import { localizedUrl } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -13,7 +14,11 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Auth" });
-  return { title: t("signupPageTitle") };
+  return {
+    title: t("signupPageTitle"),
+    description: t("signupPageDescription"),
+    alternates: { canonical: localizedUrl(locale, "/signup") },
+  };
 }
 
 export default async function SignupPage() {
