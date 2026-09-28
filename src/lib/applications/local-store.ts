@@ -1,4 +1,4 @@
-import type { ApplicationInput, JobApplication } from "@/types/application";
+import { sortApplications, type ApplicationInput, type JobApplication } from "@/types/application";
 
 const STORAGE_KEY = "applytrack:applications";
 
@@ -20,17 +20,9 @@ function writeRaw(items: JobApplication[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
-function sortByAppliedDateDesc(items: JobApplication[]) {
-  return [...items].sort((a, b) =>
-    b.appliedDate === a.appliedDate
-      ? b.createdAt.localeCompare(a.createdAt)
-      : b.appliedDate.localeCompare(a.appliedDate)
-  );
-}
-
 export const localApplicationStore = {
   getAll(): JobApplication[] {
-    return sortByAppliedDateDesc(readRaw());
+    return sortApplications(readRaw());
   },
 
   create(input: ApplicationInput): JobApplication {

@@ -7,7 +7,11 @@ import { useAuth } from "@/contexts/auth-context";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { localApplicationStore } from "@/lib/applications/local-store";
 import { supabaseApplicationStore } from "@/lib/applications/supabase-store";
-import type { ApplicationInput, JobApplication } from "@/types/application";
+import {
+  sortApplications,
+  type ApplicationInput,
+  type JobApplication,
+} from "@/types/application";
 
 export function useApplications() {
   const t = useTranslations("Dashboard");
@@ -101,7 +105,7 @@ export function useApplications() {
     async (input: ApplicationInput) => {
       if (!user) {
         const item = localApplicationStore.create(input);
-        setApplications((prev) => [item, ...prev]);
+        setApplications((prev) => sortApplications([item, ...prev]));
         return item;
       }
       const supabase = getSupabaseBrowserClient();
@@ -111,7 +115,7 @@ export function useApplications() {
         user.id,
         input
       );
-      setApplications((prev) => [item, ...prev]);
+      setApplications((prev) => sortApplications([item, ...prev]));
       return item;
     },
     [user]
@@ -123,7 +127,7 @@ export function useApplications() {
         const item = localApplicationStore.update(id, patch);
         if (item) {
           setApplications((prev) =>
-            prev.map((app) => (app.id === id ? item : app))
+            sortApplications(prev.map((app) => (app.id === id ? item : app)))
           );
         }
         return item;
@@ -132,7 +136,7 @@ export function useApplications() {
       if (!supabase) throw new Error("Supabase belum dikonfigurasi.");
       const item = await supabaseApplicationStore.update(supabase, id, patch);
       setApplications((prev) =>
-        prev.map((app) => (app.id === id ? item : app))
+        sortApplications(prev.map((app) => (app.id === id ? item : app)))
       );
       return item;
     },

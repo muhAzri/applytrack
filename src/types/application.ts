@@ -54,4 +54,14 @@ export type ApplicationInput = Omit<
   "id" | "createdAt" | "updatedAt"
 >;
 
+/** Newest applied date first, ties broken by most recently created. Keep in
+ * sync with the Supabase query order in supabase-store.ts. */
+export function sortApplications(items: JobApplication[]): JobApplication[] {
+  return [...items].sort((a, b) =>
+    b.appliedDate === a.appliedDate
+      ? b.createdAt.localeCompare(a.createdAt)
+      : b.appliedDate.localeCompare(a.appliedDate)
+  );
+}
+
 export const COMMON_SOURCE_PLATFORMS = ["LinkedIn", "JobStreet", "Indeed", "Glints", "Kalibrr"];
