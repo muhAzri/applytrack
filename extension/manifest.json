@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "ApplyTrack — Auto Capture",
+  "version": "0.1.0",
+  "description": "Automatically logs LinkedIn Easy Apply applications into your ApplyTrack dashboard.",
+  "action": {},
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/jobs/*"],
+      "js": ["src/content/linkedin.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage", "sidePanel"],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "http://localhost:3000/*",
+    "https://applytrack-eight.vercel.app/*"
+  ]
+}
