@@ -20,6 +20,7 @@ export default function App() {
 
     const onMessage = (message: ExtensionMessage) => {
       if (message.type === "JOB_CAPTURED") setPendingJob(message.payload);
+      if (message.type === "JOB_SAVED") setSavedCount((n) => n + 1);
     };
     chrome.runtime.onMessage.addListener(onMessage);
     return () => chrome.runtime.onMessage.removeListener(onMessage);

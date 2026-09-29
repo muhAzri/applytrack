@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { applications } from "../lib/api-client";
+import { today } from "../lib/dates";
 import type { ApplicationStatus } from "../types/application";
 import type { ScrapedJob } from "../types/messages";
 
@@ -10,10 +11,6 @@ const STATUSES: ApplicationStatus[] = [
   "offer",
   "rejected",
 ];
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export function CaptureReview({
   job,
