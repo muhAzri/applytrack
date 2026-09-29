@@ -11,7 +11,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  // "api" is excluded: it lives outside the [locale] segment, so letting the
+  // i18n middleware rewrite it (e.g. /api/x -> /id/api/x) 404s a route that
+  // otherwise exists.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
   ],
 };
