@@ -95,6 +95,8 @@
     "passwordLabel": "Password",
     "passwordPlaceholder": "At least 6 characters",
     "passwordTooShort": "Password must be at least 6 characters.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "submitLogin": "Log In",
     "submitSignup": "Create Account",
     "confirmTitle": "Check your email",

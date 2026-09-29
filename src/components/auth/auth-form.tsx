@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
-import { WarningCircle, CircleNotch, EnvelopeSimple } from "@phosphor-icons/react";
+import { WarningCircle, CircleNotch, EnvelopeSimple, Eye, EyeSlash } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,14 +12,32 @@ import { useAuth } from "@/contexts/auth-context";
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const t = useTranslations("Auth");
-  const { signIn, signUp, isConfigured } = useAuth();
+  const { signIn, signUp, isConfigured, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   const isLogin = mode === "login";
+
+  // Visiting /login or /signup with an existing session (e.g. via back
+  // button or a stale link) should bounce to the dashboard instead of
+  // re-prompting for credentials.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [authLoading, user, router]);
+
+  if (authLoading || user) {
+    return (
+      <div className="flex justify-center py-6">
+        <CircleNotch className="size-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -104,16 +122,31 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">{t("passwordLabel")}</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete={isLogin ? "current-password" : "new-password"}
-          required
-          minLength={6}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder={t("passwordPlaceholder")}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete={isLogin ? "current-password" : "new-password"}
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={t("passwordPlaceholder")}
+            className="pr-9"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {showPassword ? (
+              <EyeSlash weight="bold" className="size-4" />
+            ) : (
+              <Eye weight="bold" className="size-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {error && (

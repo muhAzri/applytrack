@@ -95,6 +95,8 @@
     "passwordLabel": "Kata sandi",
     "passwordPlaceholder": "Minimal 6 karakter",
     "passwordTooShort": "Kata sandi minimal 6 karakter.",
+    "showPassword": "Tampilkan kata sandi",
+    "hidePassword": "Sembunyikan kata sandi",
     "submitLogin": "Masuk",
     "submitSignup": "Buat Akun",
     "confirmTitle": "Cek email kamu",
