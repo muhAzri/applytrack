@@ -1,0 +1,68 @@
+name: Extension Release
+
+# Builds the browser extension and publishes it as a GitHub Release whenever
+# extension/manifest.json's version is bumped on main, so users can grab the
+# zip from the Releases page and load it as an unpacked extension.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "extension/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Read extension version
+        id: version
+        run: echo "version=$(node -p "require('./manifest.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Package build output
+        run: (cd dist && zip -r "../applytrack-extension-v${{ steps.version.outputs.version }}.zip" .)
+
+      - name: Check for existing release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "extension-v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # No-op when the version in manifest.json wasn't bumped since the last
+      # release — avoids failing the workflow on every unrelated extension commit.
+      - name: Create release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "extension-v${{ steps.version.outputs.version }}" \
+            "applytrack-extension-v${{ steps.version.outputs.version }}.zip" \
+            --title "Extension v${{ steps.version.outputs.version }}" \
+            --notes "Automated build from ${{ github.sha }}.
+
+          **Install:**
+          1. Download and unzip \`applytrack-extension-v${{ steps.version.outputs.version }}.zip\`
+          2. Open \`chrome://extensions\`, enable Developer mode
+          3. Click \"Load unpacked\" and select the unzipped folder"
